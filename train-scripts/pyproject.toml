@@ -1,5 +1,5 @@
 [project]
-name = "smartsusan-arch-cuda"
+name = "smartsusan-train-scripts"
 version = "0.1.0"
 description = "Arch Linux + CUDA notebook pipeline for the smartsusan snack detector"
 requires-python = ">=3.11"
