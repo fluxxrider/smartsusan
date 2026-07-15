@@ -1,8 +1,8 @@
-"""Live webcam inference for the snack detector.
+"""Live webcam inference for the snack detector — designed for macOS.
 
-Meant to run on the MacBook (this training box's webcam is unreliable) —
-auto-detects Apple Silicon `mps` if available, falling back to CUDA or CPU
-so the same script also works here for testing against a video file.
+Targets a MacBook's built-in camera and Apple Silicon `mps` backend (falls
+back to CUDA or CPU if run elsewhere, e.g. for testing against a video file
+on the training box, whose own webcam is unreliable).
 
 Usage:
     python run_live_inference.py --model snacks_best.pt
