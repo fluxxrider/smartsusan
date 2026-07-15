@@ -3,6 +3,11 @@ name = "smartsusan-train-scripts"
 version = "0.1.0"
 description = "Arch Linux + CUDA notebook pipeline for the smartsusan snack detector"
 requires-python = ">=3.11"
+# These notebooks run against the shared venv at ~/pytorch-venv, not a
+# project-local one. torch/torchvision/pillow/pyyaml/pandas/matplotlib/numpy/
+# ipykernel are already installed there; this list exists to document the
+# full set (and pin the numba workaround below), not to be installed as its
+# own isolated environment. See 00_environment_setup.ipynb, cell 2.
 dependencies = [
     "ultralytics",
     "torch",
