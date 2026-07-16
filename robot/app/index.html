@@ -1,0 +1,1610 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b0907" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23ffb52e'/%3E%3Cpath d='M24 14v20a8 8 0 0 0 16 0V14M18 33a14 14 0 0 0 28 0M32 47v8M24 55h16' fill='none' stroke='%232a1603' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <title>Smart Susan — Snack Butler</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --ink: #0b0907;
+        --counter: #15110d;
+        --counter-raised: #201811;
+        --paper: #f7e9cb;
+        --paper-muted: #c9b995;
+        --amber: #ffb52e;
+        --amber-hot: #ffcf69;
+        --amber-deep: #a85e0a;
+        --cream: #fff5dd;
+        --tomato: #ff795f;
+        --mint: #80d7a6;
+        --line: rgba(255, 213, 133, 0.18);
+        --shadow: 0 22px 70px rgba(0, 0, 0, 0.48);
+        --display: Georgia, "Times New Roman", serif;
+        --body: "Avenir Next", Avenir, "SF Pro Rounded", system-ui, sans-serif;
+        --utility: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        min-height: 100%;
+        background: var(--ink);
+      }
+
+      body {
+        min-width: 280px;
+        min-height: 100svh;
+        margin: 0;
+        overflow-x: hidden;
+        color: var(--cream);
+        font-family: var(--body);
+        -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: transparent;
+        background:
+          radial-gradient(circle at 50% -12%, rgba(255, 181, 46, 0.14), transparent 42%),
+          linear-gradient(180deg, #0b0907 0%, #100c09 100%);
+      }
+
+      button {
+        font: inherit;
+      }
+
+      button:focus-visible {
+        outline: 3px solid var(--cream);
+        outline-offset: 4px;
+      }
+
+      .app-shell {
+        position: relative;
+        isolation: isolate;
+        width: min(100%, 470px);
+        min-height: 100svh;
+        margin: 0 auto;
+        padding:
+          max(18px, env(safe-area-inset-top))
+          max(18px, env(safe-area-inset-right))
+          max(15px, env(safe-area-inset-bottom))
+          max(18px, env(safe-area-inset-left));
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .app-shell::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -2;
+        opacity: 0.19;
+        background-image:
+          linear-gradient(45deg, rgba(255, 255, 255, 0.025) 25%, transparent 25%),
+          linear-gradient(-45deg, rgba(255, 255, 255, 0.025) 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.025) 75%),
+          linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.025) 75%);
+        background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+        background-size: 16px 16px;
+      }
+
+      .app-shell::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.32);
+      }
+
+      .topbar {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 15px;
+      }
+
+      .brand-kicker,
+      .service-label,
+      .fallback-title,
+      .footer-copy {
+        margin: 0;
+        color: var(--amber);
+        font-family: var(--utility);
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+
+      .brand-name {
+        margin: -1px 0 0;
+        color: var(--cream);
+        font-family: var(--display);
+        font-size: clamp(1.9rem, 9vw, 2.65rem);
+        font-style: italic;
+        font-weight: 700;
+        line-height: 0.98;
+        letter-spacing: -0.055em;
+        text-shadow: 0 3px 18px rgba(255, 181, 46, 0.16);
+      }
+
+      .open-sign {
+        flex: none;
+        min-width: 75px;
+        margin-top: 3px;
+        padding: 8px 10px 7px;
+        border: 1px solid rgba(255, 181, 46, 0.42);
+        border-radius: 8px;
+        color: var(--amber-hot);
+        font-family: var(--utility);
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-align: center;
+        text-transform: uppercase;
+        background: rgba(255, 181, 46, 0.07);
+        box-shadow: inset 0 0 18px rgba(255, 181, 46, 0.05);
+      }
+
+      .open-sign::before {
+        content: "";
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        margin-right: 6px;
+        border-radius: 999px;
+        vertical-align: 1px;
+        background: var(--mint);
+        box-shadow: 0 0 9px rgba(128, 215, 166, 0.8);
+      }
+
+      .order-ticket {
+        position: relative;
+        min-height: 114px;
+        padding: 15px 18px 16px;
+        border: 1px solid rgba(255, 227, 171, 0.12);
+        border-radius: 14px;
+        color: var(--paper);
+        background:
+          linear-gradient(90deg, transparent 0 11px, rgba(255, 181, 46, 0.09) 11px 12px, transparent 12px),
+          linear-gradient(180deg, #211a13, #18130f);
+        box-shadow: var(--shadow), inset 0 1px rgba(255, 255, 255, 0.035);
+      }
+
+      .order-ticket::before,
+      .order-ticket::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 14px;
+        height: 28px;
+        border-radius: 999px;
+        background: var(--ink);
+        transform: translateY(-50%);
+      }
+
+      .order-ticket::before {
+        left: -8px;
+      }
+
+      .order-ticket::after {
+        right: -8px;
+      }
+
+      .service-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--paper-muted);
+      }
+
+      .service-label::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: repeating-linear-gradient(90deg, var(--line) 0 4px, transparent 4px 8px);
+      }
+
+      .status-title {
+        margin: 9px 0 4px;
+        font-family: var(--display);
+        font-size: clamp(1.25rem, 5.7vw, 1.62rem);
+        font-weight: 700;
+        line-height: 1.06;
+        letter-spacing: -0.025em;
+      }
+
+      .transcript {
+        min-height: 2.55em;
+        margin: 0;
+        overflow: hidden;
+        color: var(--paper-muted);
+        font-size: 0.89rem;
+        line-height: 1.42;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+
+      .transcript.has-speech {
+        color: var(--cream);
+      }
+
+      .service-stage {
+        flex: 1 1 auto;
+        min-height: 310px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 13px 0 10px;
+        text-align: center;
+      }
+
+      .mic-orbit {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: clamp(190px, 58vw, 254px);
+        aspect-ratio: 1;
+      }
+
+      .mic-orbit::before,
+      .mic-orbit::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .mic-orbit::before {
+        inset: 9px;
+        border: 1px dashed rgba(255, 181, 46, 0.2);
+      }
+
+      .mic-orbit::after {
+        inset: 24px;
+        border: 1px solid rgba(255, 181, 46, 0.08);
+      }
+
+      .mic-button {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        place-items: center;
+        width: clamp(148px, 45vw, 190px);
+        aspect-ratio: 1;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        color: #2a1603;
+        cursor: pointer;
+        touch-action: manipulation;
+        background:
+          radial-gradient(circle at 36% 28%, #ffe29d 0 4%, transparent 25%),
+          radial-gradient(circle at 48% 42%, var(--amber-hot), var(--amber) 61%, #dd820d 100%);
+        box-shadow:
+          0 0 0 8px #18110b,
+          0 0 0 10px rgba(255, 181, 46, 0.3),
+          0 18px 45px rgba(255, 141, 13, 0.29),
+          inset 0 -10px 18px rgba(111, 55, 0, 0.19),
+          inset 0 5px 8px rgba(255, 255, 255, 0.32);
+        transition: transform 180ms ease, filter 180ms ease, box-shadow 250ms ease;
+      }
+
+      .mic-button::before {
+        content: "";
+        position: absolute;
+        inset: -23px;
+        z-index: -1;
+        border: 2px solid rgba(255, 181, 46, 0);
+        border-radius: 50%;
+      }
+
+      .mic-button:active {
+        transform: scale(0.965);
+        filter: saturate(1.08);
+      }
+
+      .mic-button:disabled {
+        cursor: default;
+      }
+
+      .mic-svg {
+        width: 36%;
+        height: 36%;
+        overflow: visible;
+        filter: drop-shadow(0 2px 1px rgba(255, 255, 255, 0.24));
+      }
+
+      .plate-glyph,
+      .result-glyph {
+        display: none;
+        line-height: 1;
+      }
+
+      .plate-glyph {
+        font-size: clamp(3.65rem, 16vw, 5.1rem);
+      }
+
+      .result-glyph {
+        font-family: var(--body);
+        font-size: clamp(3rem, 14vw, 4.5rem);
+        font-weight: 800;
+      }
+
+      .mic-button.is-connecting {
+        filter: saturate(0.7);
+      }
+
+      .mic-button.is-connecting .mic-svg {
+        animation: gentle-bob 900ms ease-in-out infinite alternate;
+      }
+
+      .mic-button.is-listening {
+        color: #fff3d6;
+        background: radial-gradient(circle at 38% 30%, #ffb75a, var(--tomato) 58%, #b73528 100%);
+        box-shadow:
+          0 0 0 8px #18110b,
+          0 0 0 10px rgba(255, 121, 95, 0.45),
+          0 18px 48px rgba(255, 83, 54, 0.32),
+          inset 0 -10px 18px rgba(90, 18, 10, 0.24),
+          inset 0 5px 8px rgba(255, 255, 255, 0.25);
+      }
+
+      .mic-button.is-listening::before {
+        animation: listen-pulse 1.45s ease-out infinite;
+        border-color: rgba(255, 121, 95, 0.65);
+      }
+
+      .mic-button.is-delivering .mic-svg,
+      .mic-button.is-success .mic-svg,
+      .mic-button.is-failed .mic-svg {
+        display: none;
+      }
+
+      .mic-button.is-delivering {
+        color: var(--cream);
+        background: radial-gradient(circle at 38% 30%, #3b2d1f, #1a130e 72%);
+        box-shadow:
+          0 0 0 8px #18110b,
+          0 0 0 10px rgba(255, 181, 46, 0.26),
+          0 18px 45px rgba(0, 0, 0, 0.35),
+          inset 0 1px 12px rgba(255, 181, 46, 0.13);
+      }
+
+      .mic-button.is-delivering .plate-glyph {
+        display: block;
+        animation: plate-spin 1.8s cubic-bezier(0.55, 0.1, 0.45, 0.9) infinite;
+      }
+
+      .mic-button.is-success {
+        color: #112819;
+        background: radial-gradient(circle at 38% 30%, #baf3ce, var(--mint) 68%, #4aa874);
+        box-shadow:
+          0 0 0 8px #18110b,
+          0 0 0 10px rgba(128, 215, 166, 0.32),
+          0 18px 45px rgba(53, 166, 103, 0.21);
+      }
+
+      .mic-button.is-failed {
+        color: #48120b;
+        background: radial-gradient(circle at 38% 30%, #ffb19f, var(--tomato) 70%, #c44936);
+      }
+
+      .mic-button.is-success .result-glyph,
+      .mic-button.is-failed .result-glyph {
+        display: block;
+      }
+
+      .mic-label {
+        margin: 4px 0 2px;
+        color: var(--cream);
+        font-size: 1rem;
+        font-weight: 750;
+        letter-spacing: -0.01em;
+      }
+
+      .mic-hint {
+        min-height: 1.4em;
+        margin: 0;
+        color: #9e8d71;
+        font-size: 0.74rem;
+        line-height: 1.35;
+      }
+
+      .again-button {
+        display: none;
+        min-height: 46px;
+        margin-top: 12px;
+        padding: 0 19px;
+        border: 1px solid rgba(255, 181, 46, 0.4);
+        border-radius: 999px;
+        color: var(--amber-hot);
+        font-weight: 750;
+        cursor: pointer;
+        background: rgba(255, 181, 46, 0.08);
+      }
+
+      .again-button.is-visible {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .fallbacks {
+        padding-top: 13px;
+        border-top: 1px solid var(--line);
+      }
+
+      .fallback-title {
+        margin-bottom: 9px;
+        color: #998667;
+        text-align: center;
+      }
+
+      .snack-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 7px;
+      }
+
+      .snack-button {
+        min-width: 0;
+        min-height: 58px;
+        padding: 6px 3px 7px;
+        border: 1px solid rgba(255, 222, 159, 0.12);
+        border-radius: 12px;
+        color: #dbc9a5;
+        cursor: pointer;
+        touch-action: manipulation;
+        background: rgba(255, 255, 255, 0.025);
+        transition: border-color 160ms ease, color 160ms ease, background 160ms ease, transform 160ms ease;
+      }
+
+      .snack-button:active {
+        transform: translateY(1px);
+      }
+
+      .snack-button:disabled {
+        opacity: 0.42;
+        cursor: default;
+      }
+
+      .snack-button:not(:disabled):hover {
+        border-color: rgba(255, 181, 46, 0.38);
+        color: var(--cream);
+        background: rgba(255, 181, 46, 0.07);
+      }
+
+      .snack-emoji {
+        display: block;
+        margin-bottom: 3px;
+        font-size: 1.35rem;
+        line-height: 1;
+      }
+
+      .snack-name {
+        display: block;
+        overflow: hidden;
+        font-size: clamp(0.68rem, 2.6vw, 0.74rem);
+        font-weight: 680;
+        line-height: 1.1;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .footer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 31px;
+        padding-top: 10px;
+      }
+
+      .footer-copy {
+        color: #a18e70;
+        font-size: 0.6rem;
+        letter-spacing: 0.11em;
+      }
+
+      .footer-copy::before {
+        content: "✦";
+        margin-right: 7px;
+        color: var(--amber-deep);
+      }
+
+      .toast-region {
+        position: fixed;
+        z-index: 20;
+        right: max(16px, env(safe-area-inset-right));
+        bottom: max(18px, env(safe-area-inset-bottom));
+        left: max(16px, env(safe-area-inset-left));
+        display: flex;
+        justify-content: center;
+        pointer-events: none;
+      }
+
+      .toast {
+        width: min(100%, 420px);
+        padding: 12px 15px;
+        border: 1px solid rgba(255, 181, 46, 0.28);
+        border-radius: 12px;
+        color: var(--cream);
+        font-size: 0.82rem;
+        font-weight: 650;
+        line-height: 1.35;
+        text-align: center;
+        background: rgba(35, 25, 17, 0.97);
+        box-shadow: 0 14px 38px rgba(0, 0, 0, 0.45);
+        opacity: 0;
+        transform: translateY(14px) scale(0.98);
+        transition: opacity 180ms ease, transform 180ms ease;
+      }
+
+      .toast.is-visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+
+      @keyframes listen-pulse {
+        0% {
+          opacity: 0.9;
+          transform: scale(0.92);
+        }
+        90%, 100% {
+          opacity: 0;
+          transform: scale(1.24);
+        }
+      }
+
+      @keyframes plate-spin {
+        0% {
+          transform: rotate(0deg) scale(0.96);
+        }
+        50% {
+          transform: rotate(190deg) scale(1.04);
+        }
+        100% {
+          transform: rotate(360deg) scale(0.96);
+        }
+      }
+
+      @keyframes gentle-bob {
+        from { transform: translateY(-2px); }
+        to { transform: translateY(3px); }
+      }
+
+      @media (max-height: 720px) {
+        .app-shell {
+          padding-top: max(12px, env(safe-area-inset-top));
+        }
+
+        .topbar {
+          margin-bottom: 10px;
+        }
+
+        .brand-name {
+          font-size: 1.85rem;
+        }
+
+        .order-ticket {
+          min-height: 99px;
+          padding-top: 12px;
+          padding-bottom: 12px;
+        }
+
+        .status-title {
+          margin-top: 6px;
+          font-size: 1.2rem;
+        }
+
+        .service-stage {
+          min-height: 260px;
+          padding-top: 7px;
+          padding-bottom: 6px;
+        }
+
+        .mic-orbit {
+          width: 196px;
+        }
+
+        .mic-button {
+          width: 150px;
+        }
+
+        .fallbacks {
+          padding-top: 9px;
+        }
+
+        .snack-button {
+          min-height: 51px;
+        }
+
+        .footer {
+          min-height: 22px;
+          padding-top: 6px;
+        }
+      }
+
+      @media (max-width: 330px) {
+        .app-shell {
+          padding-right: 13px;
+          padding-left: 13px;
+        }
+
+        .brand-name {
+          font-size: 1.8rem;
+        }
+
+        .open-sign {
+          min-width: 68px;
+          padding-right: 7px;
+          padding-left: 7px;
+        }
+
+        .snack-row {
+          gap: 5px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 1ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 1ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="brand-kicker">Your counter-side snack butler</p>
+          <h1 class="brand-name">Smart Susan</h1>
+        </div>
+        <div class="open-sign" id="openSign">On duty</div>
+      </header>
+
+      <main>
+        <section class="order-ticket" aria-labelledby="statusTitle">
+          <p class="service-label">Order window</p>
+          <h2 class="status-title" id="statusTitle" aria-live="polite" aria-atomic="true">What can I get you, hon?</h2>
+          <p class="transcript" id="transcript" aria-live="off">
+            Tap the mic, then say your snack.
+          </p>
+        </section>
+
+        <section class="service-stage" aria-label="Voice ordering">
+          <div class="mic-orbit">
+            <button class="mic-button" id="micButton" type="button" aria-label="Start listening">
+              <svg class="mic-svg" viewBox="0 0 64 64" aria-hidden="true">
+                <rect x="22" y="7" width="20" height="34" rx="10" fill="currentColor"></rect>
+                <path d="M15 31a17 17 0 0 0 34 0M32 48v9M23 57h18" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"></path>
+              </svg>
+              <span class="plate-glyph" aria-hidden="true">🍽️</span>
+              <span class="result-glyph" id="resultGlyph" aria-hidden="true">✓</span>
+            </button>
+          </div>
+          <p class="mic-label" id="micLabel">Tap to order</p>
+          <p class="mic-hint" id="micHint">Try “Capri Sun” or “fruit snacks.”</p>
+          <button class="again-button" id="againButton" type="button">Order another</button>
+        </section>
+
+        <section class="fallbacks" aria-labelledby="fallbackTitle">
+          <h2 class="fallback-title" id="fallbackTitle">Room too loud? Tap an order</h2>
+          <div class="snack-row">
+            <button class="snack-button" type="button" data-snack="bar" data-label="bar" aria-label="Order a bar">
+              <span class="snack-emoji" aria-hidden="true">🍫</span>
+              <span class="snack-name">Bar</span>
+            </button>
+            <button class="snack-button" type="button" data-snack="bear" data-label="bear" aria-label="Order fruit splits">
+              <span class="snack-emoji" aria-hidden="true">🐻</span>
+              <span class="snack-name">Bear</span>
+            </button>
+            <button class="snack-button" type="button" data-snack="juice" data-label="juice" aria-label="Order a juice">
+              <span class="snack-emoji" aria-hidden="true">🧃</span>
+              <span class="snack-name">Juice</span>
+            </button>
+            <button class="snack-button" type="button" data-snack="welchs" data-label="fruit snacks" aria-label="Order fruit snacks">
+              <span class="snack-emoji" aria-hidden="true">🍬</span>
+              <span class="snack-name">Fruit snacks</span>
+            </button>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <p class="footer-copy">Fresh from Susan’s serving station</p>
+      </footer>
+    </div>
+
+    <div class="toast-region">
+      <div class="toast" id="toast" role="alert" aria-atomic="true"></div>
+    </div>
+
+    <script>
+      // ── Smart Susan configuration ──────────────────────────────────────────
+      // Use a restricted, credit-capped key for this private client-side app.
+      const ELEVENLABS_API_KEY = "PUT_YOUR_ELEVENLABS_KEY_HERE";
+      const VOICE_ID = "21m00Tcm4TlvDq8ikWAM"; // Rachel — warm, expressive female voice
+      const ROBOT_BASE_URL = "http://10.243.37.251:5050";
+      const STT_WEBSOCKET_URL = "wss://api.elevenlabs.io/v1/speech-to-text/realtime?model_id=scribe_v2_realtime&commit_strategy=vad";
+      const TTS_MODEL_ID = "eleven_turbo_v2_5";
+      const IS_DEMO_MODE = new URLSearchParams(window.location.search).has("demo");
+
+      const ui = {
+        openSign: document.querySelector("#openSign"),
+        statusTitle: document.querySelector("#statusTitle"),
+        transcript: document.querySelector("#transcript"),
+        micButton: document.querySelector("#micButton"),
+        micLabel: document.querySelector("#micLabel"),
+        micHint: document.querySelector("#micHint"),
+        resultGlyph: document.querySelector("#resultGlyph"),
+        againButton: document.querySelector("#againButton"),
+        snackButtons: [...document.querySelectorAll(".snack-button")],
+        toast: document.querySelector("#toast")
+      };
+
+      const state = {
+        phase: "idle",
+        listenRun: 0,
+        deliveryRun: 0,
+        websocket: null,
+        mediaStream: null,
+        captureContext: null,
+        mediaSource: null,
+        processor: null,
+        silentSink: null,
+        pendingAudio: new Uint8Array(0),
+        playbackContext: null,
+        speechQueue: Promise.resolve(),
+        speechRun: 0,
+        currentSpeechSource: null,
+        isFinishingListen: false,
+        deliveryLocked: false,
+        toastTimer: null,
+        demoStatusChecks: 0
+      };
+
+      const snackMatchers = [
+        { id: "welchs", label: "fruit snacks", patterns: [/\bfruit\s*snacks?\b/i, /\bwelch(?:'s|s)?\b/i] },
+        { id: "bear", label: "bear", patterns: [/\bbear\b/i, /\bfruit\s*splits?\b/i] },
+        { id: "juice", label: "juice", patterns: [/\bjuice\b/i, /\bcapri\s*sun\b/i, /\bcaprisun\b/i] },
+        { id: "bar", label: "bar", patterns: [/\bbar\b/i, /\bnutri[\s-]*grain\b/i, /\bgranola\b/i] }
+      ];
+
+      const phaseCopy = {
+        idle: {
+          title: "What can I get you, hon?",
+          transcript: "Tap the mic, then say your snack.",
+          label: "Tap to order",
+          hint: "Try “Capri Sun” or “fruit snacks.”"
+        },
+        connecting: {
+          title: "One sec, sugar…",
+          transcript: "Warming up the order line.",
+          label: "Getting ready",
+          hint: "You may see a microphone permission prompt."
+        },
+        listening: {
+          title: "I’m all ears.",
+          transcript: "Go ahead—tell Susan what sounds good.",
+          label: "Listening… tap when finished",
+          hint: "Say bar, bear, juice, or fruit snacks."
+        },
+        delivering: {
+          title: "Good pick, sugar.",
+          transcript: "Susan is spinning up your order.",
+          label: "Delivering…",
+          hint: "Your snack is on the move."
+        },
+        success: {
+          title: "Order up!",
+          transcript: "Here’s your snack — enjoy!",
+          label: "Delivered",
+          hint: "Susan’s ready whenever you are."
+        },
+        failed: {
+          title: "Aw, crumbs.",
+          transcript: "I couldn’t find that one this time.",
+          label: "Not delivered",
+          hint: "Give the order another try."
+        }
+      };
+
+      function setPhase(phase, overrides = {}) {
+        state.phase = phase;
+        state.isFinishingListen = false;
+        const copy = { ...phaseCopy[phase], ...overrides };
+        const classNames = ["mic-button", `is-${phase}`];
+
+        ui.statusTitle.textContent = copy.title;
+        ui.transcript.textContent = copy.transcript;
+        ui.transcript.classList.toggle("has-speech", Boolean(overrides.transcript));
+        ui.micLabel.textContent = copy.label;
+        ui.micHint.textContent = copy.hint;
+        ui.micButton.className = classNames.join(" ");
+        ui.micButton.disabled = phase === "delivering" || phase === "success" || phase === "failed";
+        ui.micButton.setAttribute(
+          "aria-label",
+          phase === "listening" ? "Finish listening" : phase === "idle" ? "Start listening" : copy.label
+        );
+
+        ui.snackButtons.forEach((button) => {
+          button.disabled = phase === "connecting" || phase === "listening" || phase === "delivering";
+        });
+
+        const showAgain = phase === "success" || phase === "failed";
+        ui.againButton.classList.toggle("is-visible", showAgain);
+        ui.resultGlyph.textContent = phase === "failed" ? "!" : "✓";
+
+        if (showAgain) {
+          window.setTimeout(() => ui.againButton.focus({ preventScroll: true }), 0);
+        }
+      }
+
+      function showToast(message, duration = 4200) {
+        window.clearTimeout(state.toastTimer);
+        ui.toast.textContent = message;
+        ui.toast.classList.add("is-visible");
+        state.toastTimer = window.setTimeout(() => {
+          ui.toast.classList.remove("is-visible");
+        }, duration);
+      }
+
+      function hasConfiguredKey() {
+        return Boolean(
+          ELEVENLABS_API_KEY &&
+          !ELEVENLABS_API_KEY.includes("PASTE_YOUR") &&
+          !ELEVENLABS_API_KEY.includes("YOUR_API_KEY")
+        );
+      }
+
+      function matchSnack(transcript) {
+        return snackMatchers.find((snack) => snack.patterns.some((pattern) => pattern.test(transcript))) || null;
+      }
+
+      function wait(milliseconds) {
+        return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+      }
+
+      async function fetchWithTimeout(url, options = {}, timeoutMs = 12000) {
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+        try {
+          return await fetch(url, { ...options, signal: controller.signal });
+        } catch (error) {
+          if (error?.name === "AbortError") {
+            throw new Error("That connection took too long to answer.");
+          }
+          throw error;
+        } finally {
+          window.clearTimeout(timeout);
+        }
+      }
+
+      async function primePlayback() {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+
+        if (!state.playbackContext || state.playbackContext.state === "closed") {
+          state.playbackContext = new AudioContextClass();
+        }
+
+        if (state.playbackContext.state === "suspended") {
+          await state.playbackContext.resume();
+        }
+      }
+
+      function cancelSpeech() {
+        state.speechRun += 1;
+        state.speechQueue = Promise.resolve();
+        if (state.currentSpeechSource) {
+          try { state.currentSpeechSource.stop(); } catch {}
+          try { state.currentSpeechSource.disconnect(); } catch {}
+          state.currentSpeechSource = null;
+        }
+      }
+
+      function speak(text, speechRun = state.speechRun) {
+        const task = state.speechQueue
+          .catch(() => undefined)
+          .then(() => synthesizeAndPlay(text, speechRun));
+        state.speechQueue = task;
+        return task;
+      }
+
+      async function synthesizeAndPlay(text, speechRun) {
+        if (speechRun !== state.speechRun) return;
+        if (IS_DEMO_MODE) {
+          await wait(180);
+          return;
+        }
+
+        if (!hasConfiguredKey()) {
+          throw new Error("Add the ElevenLabs key at the top of index.html to turn on Susan’s voice.");
+        }
+
+        const response = await fetchWithTimeout(
+          `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(VOICE_ID)}?output_format=mp3_44100_128`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "audio/mpeg",
+              "xi-api-key": ELEVENLABS_API_KEY
+            },
+            body: JSON.stringify({
+              text,
+              model_id: TTS_MODEL_ID
+            })
+          },
+          20000
+        );
+
+        if (!response.ok) {
+          throw new Error(await readableResponseError(response, "Susan’s voice line didn’t connect."));
+        }
+
+        if (speechRun !== state.speechRun) return;
+        await primePlayback();
+        if (!state.playbackContext) {
+          throw new Error("Audio playback isn’t available in this browser.");
+        }
+
+        const audioData = await response.arrayBuffer();
+        const decodedAudio = await state.playbackContext.decodeAudioData(audioData.slice(0));
+        const source = state.playbackContext.createBufferSource();
+        source.buffer = decodedAudio;
+        source.connect(state.playbackContext.destination);
+        if (speechRun !== state.speechRun) {
+          source.disconnect();
+          return;
+        }
+        state.currentSpeechSource = source;
+
+        await new Promise((resolve, reject) => {
+          source.addEventListener("ended", resolve, { once: true });
+          try {
+            source.start(0);
+          } catch (error) {
+            reject(error);
+          }
+        });
+        if (state.currentSpeechSource === source) {
+          state.currentSpeechSource = null;
+        }
+        try { source.disconnect(); } catch {}
+      }
+
+      async function readableResponseError(response, fallback) {
+        try {
+          const data = await response.clone().json();
+          const detail = data?.detail?.message || data?.detail || data?.error || data?.message;
+          if (typeof detail === "string" && detail.length < 180) return detail;
+        } catch {
+          // The friendly fallback below is more useful than a non-JSON response body.
+        }
+        return `${fallback} (${response.status})`;
+      }
+
+      async function createScribeToken() {
+        const response = await fetchWithTimeout(
+          "https://api.elevenlabs.io/v1/single-use-token/realtime_scribe",
+          {
+            method: "POST",
+            headers: {
+              "xi-api-key": ELEVENLABS_API_KEY
+            }
+          },
+          12000
+        );
+
+        if (!response.ok) {
+          throw new Error(await readableResponseError(response, "The order line couldn’t sign in."));
+        }
+
+        const data = await response.json();
+        if (!data.token) throw new Error("The order line didn’t receive a listening token.");
+        return data.token;
+      }
+
+      function microphoneErrorMessage(error) {
+        if (error?.name === "NotAllowedError" || error?.name === "PermissionDeniedError") {
+          return "Mic access is off. Allow it in your browser settings, then tap again.";
+        }
+        if (error?.name === "NotFoundError" || error?.name === "DevicesNotFoundError") {
+          return "I can’t find a microphone on this device.";
+        }
+        if (error?.name === "NotReadableError" || error?.name === "TrackStartError") {
+          return "Another app has the mic right now. Close it and try again.";
+        }
+        if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+          return "Voice ordering needs a secure browser connection. The tap-order buttons still work.";
+        }
+        return error?.message || "The order line hit a snag. Tap the mic to try again.";
+      }
+
+      async function releaseCaptureResources(context, stream) {
+        stream?.getTracks().forEach((track) => track.stop());
+        if (context && context.state !== "closed") {
+          try { await context.close(); } catch {}
+        }
+      }
+
+      function clearOwnedCaptureResources(context, stream) {
+        if (state.captureContext === context) state.captureContext = null;
+        if (state.mediaStream === stream) state.mediaStream = null;
+      }
+
+      async function startListening() {
+        if (state.phase !== "idle") return;
+
+        const run = ++state.listenRun;
+        let localContext = null;
+        let localStream = null;
+        setPhase("connecting");
+
+        if (IS_DEMO_MODE) {
+          runDemoVoiceOrder(run);
+          return;
+        }
+
+        if (!hasConfiguredKey()) {
+          showToast("Add your ElevenLabs key at the top of index.html to open the voice order line.");
+          setPhase("idle");
+          return;
+        }
+
+        try {
+          if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+            throw new DOMException("Voice ordering needs a secure browser connection.", "SecurityError");
+          }
+
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextClass) throw new Error("This browser doesn’t support live microphone audio.");
+
+          localContext = new AudioContextClass({ sampleRate: 16000 });
+          await localContext.resume();
+          if (run !== state.listenRun) {
+            await releaseCaptureResources(localContext, localStream);
+            return;
+          }
+
+          localStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              channelCount: 1,
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true
+            }
+          });
+
+          if (run !== state.listenRun) {
+            await releaseCaptureResources(localContext, localStream);
+            return;
+          }
+
+          state.captureContext = localContext;
+          state.mediaStream = localStream;
+
+          const token = await createScribeToken();
+          if (run !== state.listenRun) {
+            await releaseCaptureResources(localContext, localStream);
+            clearOwnedCaptureResources(localContext, localStream);
+            return;
+          }
+
+          const url = new URL(STT_WEBSOCKET_URL);
+          url.searchParams.set("token", token);
+          url.searchParams.set("audio_format", "pcm_16000");
+
+          const websocket = new WebSocket(url.toString());
+          state.websocket = websocket;
+
+          await openWebsocket(websocket, run);
+          if (run !== state.listenRun) return;
+
+          beginAudioCapture();
+          setPhase("listening");
+        } catch (error) {
+          if (run !== state.listenRun) {
+            await releaseCaptureResources(localContext, localStream);
+            clearOwnedCaptureResources(localContext, localStream);
+            return;
+          }
+          await releaseCaptureResources(localContext, localStream);
+          clearOwnedCaptureResources(localContext, localStream);
+          showToast(microphoneErrorMessage(error));
+          await stopListening();
+          setPhase("idle");
+        }
+      }
+
+      function openWebsocket(websocket, run) {
+        return new Promise((resolve, reject) => {
+          const timeout = window.setTimeout(() => {
+            reject(new Error("The order line took too long to answer."));
+          }, 12000);
+
+          websocket.addEventListener("open", () => {
+            window.clearTimeout(timeout);
+            resolve();
+          }, { once: true });
+
+          websocket.addEventListener("error", () => {
+            window.clearTimeout(timeout);
+            reject(new Error("Susan couldn’t connect to the voice order line."));
+          }, { once: true });
+
+          websocket.addEventListener("message", (event) => handleTranscriptMessage(event, run));
+          websocket.addEventListener("close", () => {
+            window.clearTimeout(timeout);
+            if (run === state.listenRun && state.phase === "listening") {
+              showToast("The voice order line disconnected. Tap the mic to reconnect.");
+              void stopListening().then(() => setPhase("idle"));
+            }
+          });
+        });
+      }
+
+      function handleTranscriptMessage(event, run) {
+        if (run !== state.listenRun || state.phase === "delivering") return;
+
+        let message;
+        try {
+          message = JSON.parse(event.data);
+        } catch {
+          return;
+        }
+
+        if (message.message_type === "partial_transcript") {
+          const text = String(message.text || "").trim();
+          if (text) {
+            ui.transcript.textContent = text;
+            ui.transcript.classList.add("has-speech");
+          }
+          return;
+        }
+
+        if (message.message_type === "committed_transcript") {
+          const text = String(message.text || "").trim();
+          if (!text) return;
+
+          ui.transcript.textContent = `“${text}”`;
+          ui.transcript.classList.add("has-speech");
+          const snack = matchSnack(text);
+
+          if (snack) {
+            void deliverSnack(snack.id, snack.label);
+          } else {
+            ui.statusTitle.textContent = "I caught that, sugar…";
+            ui.micHint.textContent = "Try bar, bear, juice, or fruit snacks.";
+          }
+          return;
+        }
+
+        if (message.message_type?.includes("error") || message.error) {
+          const detail = typeof message.error === "string" ? message.error : "The voice order line hit a snag.";
+          showToast(detail);
+          void stopListening().then(() => setPhase("idle"));
+        }
+      }
+
+      function beginAudioCapture() {
+        const context = state.captureContext;
+        if (!context || !state.mediaStream) throw new Error("The microphone wasn’t ready.");
+
+        state.pendingAudio = new Uint8Array(0);
+        state.mediaSource = context.createMediaStreamSource(state.mediaStream);
+        state.processor = context.createScriptProcessor(4096, 1, 1);
+        state.silentSink = context.createGain();
+        state.silentSink.gain.value = 0;
+
+        state.processor.onaudioprocess = (audioEvent) => {
+          if (state.phase !== "listening" || state.isFinishingListen || state.websocket?.readyState !== WebSocket.OPEN) return;
+          const samples = audioEvent.inputBuffer.getChannelData(0);
+          const resampled = downsample(samples, context.sampleRate, 16000);
+          queuePcmChunk(floatToLittleEndianPcm16(resampled));
+        };
+
+        state.mediaSource.connect(state.processor);
+        state.processor.connect(state.silentSink);
+        state.silentSink.connect(context.destination);
+      }
+
+      function downsample(input, inputRate, outputRate) {
+        if (inputRate === outputRate) return new Float32Array(input);
+        if (inputRate < outputRate) return new Float32Array(input);
+
+        const ratio = inputRate / outputRate;
+        const outputLength = Math.max(1, Math.round(input.length / ratio));
+        const output = new Float32Array(outputLength);
+
+        for (let outputIndex = 0; outputIndex < outputLength; outputIndex += 1) {
+          const start = Math.floor(outputIndex * ratio);
+          const end = Math.min(input.length, Math.floor((outputIndex + 1) * ratio));
+          let sum = 0;
+          let count = 0;
+          for (let inputIndex = start; inputIndex < end; inputIndex += 1) {
+            sum += input[inputIndex];
+            count += 1;
+          }
+          output[outputIndex] = count ? sum / count : input[start] || 0;
+        }
+        return output;
+      }
+
+      function floatToLittleEndianPcm16(samples) {
+        const bytes = new Uint8Array(samples.length * 2);
+        const view = new DataView(bytes.buffer);
+        for (let index = 0; index < samples.length; index += 1) {
+          const clamped = Math.max(-1, Math.min(1, samples[index]));
+          const signed = clamped < 0 ? clamped * 0x8000 : clamped * 0x7fff;
+          view.setInt16(index * 2, signed, true);
+        }
+        return bytes;
+      }
+
+      function queuePcmChunk(bytes) {
+        const merged = new Uint8Array(state.pendingAudio.length + bytes.length);
+        merged.set(state.pendingAudio, 0);
+        merged.set(bytes, state.pendingAudio.length);
+        state.pendingAudio = merged;
+
+        const bytesPerTwoTenths = 16000 * 2 * 0.2;
+        while (state.pendingAudio.length >= bytesPerTwoTenths) {
+          const chunk = state.pendingAudio.slice(0, bytesPerTwoTenths);
+          state.pendingAudio = state.pendingAudio.slice(bytesPerTwoTenths);
+          sendAudioChunk(chunk);
+        }
+      }
+
+      function sendAudioChunk(bytes, commit = false) {
+        if (state.websocket?.readyState !== WebSocket.OPEN) return;
+        state.websocket.send(JSON.stringify({
+          message_type: "input_audio_chunk",
+          audio_base_64: bytesToBase64(bytes),
+          commit,
+          sample_rate: 16000
+        }));
+      }
+
+      function waitForCommittedTranscript(websocket, timeoutMs = 3500) {
+        return new Promise((resolve) => {
+          let settled = false;
+          const settle = () => {
+            if (settled) return;
+            settled = true;
+            window.clearTimeout(timeout);
+            websocket.removeEventListener("message", onMessage);
+            websocket.removeEventListener("close", settle);
+            websocket.removeEventListener("error", settle);
+            resolve();
+          };
+          const onMessage = (event) => {
+            try {
+              const message = JSON.parse(event.data);
+              if (message.message_type === "committed_transcript" || message.message_type?.includes("error") || message.error) {
+                settle();
+              }
+            } catch {
+              // Ignore unrelated non-JSON frames while waiting for the final transcript.
+            }
+          };
+          const timeout = window.setTimeout(settle, timeoutMs);
+          websocket.addEventListener("message", onMessage);
+          websocket.addEventListener("close", settle);
+          websocket.addEventListener("error", settle);
+        });
+      }
+
+      function bytesToBase64(bytes) {
+        let binary = "";
+        const blockSize = 0x8000;
+        for (let offset = 0; offset < bytes.length; offset += blockSize) {
+          binary += String.fromCharCode(...bytes.subarray(offset, offset + blockSize));
+        }
+        return window.btoa(binary);
+      }
+
+      async function finishListening() {
+        if (state.phase !== "listening" || state.isFinishingListen) return;
+
+        const run = state.listenRun;
+        state.isFinishingListen = true;
+        ui.micButton.disabled = true;
+        ui.micLabel.textContent = "Finishing your order…";
+        ui.micHint.textContent = "Just a sec while Susan checks the ticket.";
+
+        if (state.websocket?.readyState === WebSocket.OPEN) {
+          const websocket = state.websocket;
+          const committedTranscript = waitForCommittedTranscript(websocket);
+          const finalChunk = state.pendingAudio.length
+            ? state.pendingAudio
+            : new Uint8Array(640);
+          state.pendingAudio = new Uint8Array(0);
+          sendAudioChunk(finalChunk, true);
+          await committedTranscript;
+        }
+
+        if (run !== state.listenRun || state.phase === "delivering") return;
+        await stopListening();
+        setPhase("idle", {
+          title: "Which snack was that, hon?",
+          transcript: "I didn’t hear bar, bear, juice, or fruit snacks.",
+          label: "Tap to try again",
+          hint: "You can also tap one of the snack buttons below."
+        });
+      }
+
+      async function stopListening() {
+        state.listenRun += 1;
+
+        if (state.processor) {
+          state.processor.onaudioprocess = null;
+          try { state.processor.disconnect(); } catch {}
+        }
+        if (state.mediaSource) {
+          try { state.mediaSource.disconnect(); } catch {}
+        }
+        if (state.silentSink) {
+          try { state.silentSink.disconnect(); } catch {}
+        }
+        if (state.mediaStream) {
+          state.mediaStream.getTracks().forEach((track) => track.stop());
+        }
+        if (state.websocket) {
+          state.websocket.onclose = null;
+          try { state.websocket.close(1000, "Order captured"); } catch {}
+        }
+        if (state.captureContext && state.captureContext.state !== "closed") {
+          try { await state.captureContext.close(); } catch {}
+        }
+
+        state.websocket = null;
+        state.mediaStream = null;
+        state.captureContext = null;
+        state.mediaSource = null;
+        state.processor = null;
+        state.silentSink = null;
+        state.pendingAudio = new Uint8Array(0);
+      }
+
+      function runDemoVoiceOrder(run) {
+        window.setTimeout(() => {
+          if (run !== state.listenRun || state.phase !== "connecting") return;
+          setPhase("listening");
+        }, 280);
+        window.setTimeout(() => {
+          if (run !== state.listenRun || state.phase !== "listening") return;
+          ui.transcript.textContent = "Could I get a Capri…";
+          ui.transcript.classList.add("has-speech");
+        }, 850);
+        window.setTimeout(() => {
+          if (run !== state.listenRun || state.phase !== "listening") return;
+          ui.transcript.textContent = "“Could I get a Capri Sun?”";
+          void deliverSnack("juice", "juice");
+        }, 1450);
+      }
+
+      async function deliverSnack(snackId, snackLabel) {
+        if (state.deliveryLocked || state.phase === "delivering") return;
+
+        state.deliveryLocked = true;
+        const run = ++state.deliveryRun;
+        cancelSpeech();
+        const speechRun = state.speechRun;
+        setPhase("delivering", {
+          title: `${snackLabel.charAt(0).toUpperCase() + snackLabel.slice(1)}—good pick.`,
+          transcript: "Sure! Coming right up!"
+        });
+        await stopListening();
+
+        void speak("Sure! Coming right up!", speechRun).catch((error) => {
+          showToast(error.message || "Susan’s voice is taking a break, but your order is still moving.");
+        });
+
+        try {
+          await postDelivery(snackId);
+          if (run !== state.deliveryRun) return;
+          await pollRobotStatus(run);
+        } catch (error) {
+          if (run !== state.deliveryRun) return;
+          const message = friendlyRobotError(error);
+          showToast(message);
+          finishConnectionError(run);
+        }
+      }
+
+      async function postDelivery(snackId) {
+        if (IS_DEMO_MODE) {
+          state.demoStatusChecks = 0;
+          await wait(250);
+          return { status: "delivering" };
+        }
+
+        const response = await fetchWithTimeout(
+          `${ROBOT_BASE_URL}/deliver`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ snack: snackId })
+          },
+          10000
+        );
+
+        if (!response.ok) {
+          throw new Error(await readableResponseError(response, "The snack station didn’t accept the order."));
+        }
+        const data = await response.json();
+        if (!String(data?.status || "").toLowerCase().includes("delivering")) {
+          throw new Error("The snack station answered, but didn’t start the delivery.");
+        }
+        return data;
+      }
+
+      async function pollRobotStatus(run) {
+        const maximumChecks = 90;
+        for (let attempt = 0; attempt < maximumChecks; attempt += 1) {
+          await wait(2000);
+          if (run !== state.deliveryRun) return;
+
+          const status = await fetchRobotStatus();
+          const outcome = classifyRobotStatus(status);
+
+          if (outcome === "delivered") {
+            await finishDelivery(true, run);
+            return;
+          }
+          if (outcome === "failed") {
+            await finishDelivery(false, run);
+            return;
+          }
+        }
+
+        throw new Error("Susan lost track of that order. Check the serving station, then try again.");
+      }
+
+      async function fetchRobotStatus() {
+        if (IS_DEMO_MODE) {
+          state.demoStatusChecks += 1;
+          return { snack: "juice", last: state.demoStatusChecks >= 1 ? "delivered" : "delivering" };
+        }
+
+        const response = await fetchWithTimeout(
+          `${ROBOT_BASE_URL}/status`,
+          {
+            method: "GET",
+            cache: "no-store"
+          },
+          8000
+        );
+        if (!response.ok) {
+          throw new Error(await readableResponseError(response, "The snack station stopped answering."));
+        }
+        return response.json();
+      }
+
+      function classifyRobotStatus(response) {
+        let lastValue = response;
+        if (Array.isArray(response)) {
+          lastValue = response.length ? response[response.length - 1] : "";
+        } else if (response && typeof response === "object") {
+          if (Object.prototype.hasOwnProperty.call(response, "last")) {
+            lastValue = response.last;
+          } else {
+            const values = Object.values(response);
+            lastValue = values.length ? values[values.length - 1] : "";
+          }
+        }
+        const text = typeof lastValue === "string" ? lastValue : JSON.stringify(lastValue ?? "");
+        const normalized = text.toLowerCase();
+        if (
+          normalized.includes("failed") ||
+          normalized.includes("not delivered") ||
+          normalized.includes("undelivered")
+        ) return "failed";
+        if (normalized.includes("delivered")) return "delivered";
+        return "pending";
+      }
+
+      async function finishDelivery(succeeded, run) {
+        if (run !== state.deliveryRun) return;
+        state.deliveryLocked = false;
+
+        if (succeeded) {
+          setPhase("success");
+          void speak("Here's your snack — enjoy!").catch((error) => {
+            showToast(error.message || "Your snack is here—Susan’s voice just needs another tap.");
+          });
+        } else {
+          setPhase("failed", {
+            transcript: "Hmm, I couldn’t find that one, sorry!"
+          });
+          void speak("Hmm, I couldn't find that one, sorry!").catch((error) => {
+            showToast(error.message || "Susan couldn’t play the update, but the order didn’t complete.");
+          });
+        }
+      }
+
+      function finishConnectionError(run) {
+        if (run !== state.deliveryRun) return;
+        state.deliveryLocked = false;
+        cancelSpeech();
+        setPhase("failed", {
+          title: "The station went quiet.",
+          transcript: "Your order didn’t reach Susan’s serving station.",
+          label: "Not connected",
+          hint: "Check the local connection, then try again."
+        });
+      }
+
+      function friendlyRobotError(error) {
+        if (window.location.protocol === "https:" && ROBOT_BASE_URL.startsWith("http://")) {
+          return "This secure page can’t reach Susan’s local station until the station has a secure address.";
+        }
+        if (window.location.protocol === "file:") {
+          return "Open Smart Susan from a local web address so she can reach the serving station.";
+        }
+        if (/failed to fetch|networkerror|load failed/i.test(String(error?.message || ""))) {
+          return "Susan can’t reach the snack station. Check that you’re on the same local network.";
+        }
+        return error?.message || "Susan can’t reach the snack station right now.";
+      }
+
+      function resetOrder() {
+        state.deliveryRun += 1;
+        state.deliveryLocked = false;
+        cancelSpeech();
+        setPhase("idle");
+        window.setTimeout(() => ui.micButton.focus({ preventScroll: true }), 0);
+      }
+
+      ui.micButton.addEventListener("click", () => {
+        void primePlayback();
+        if (state.phase === "listening") {
+          void finishListening();
+        } else if (state.phase === "connecting") {
+          void stopListening().then(() => setPhase("idle"));
+        } else if (state.phase === "idle") {
+          void startListening();
+        }
+      });
+
+      ui.snackButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          void primePlayback();
+          void deliverSnack(button.dataset.snack, button.dataset.label);
+        });
+      });
+
+      ui.againButton.addEventListener("click", resetOrder);
+
+      window.addEventListener("pagehide", () => {
+        state.deliveryRun += 1;
+        state.deliveryLocked = false;
+        cancelSpeech();
+        void stopListening();
+      });
+
+      if (IS_DEMO_MODE) {
+        ui.openSign.textContent = "Demo shift";
+      }
+
+      setPhase("idle");
+    </script>
+  </body>
+</html>
